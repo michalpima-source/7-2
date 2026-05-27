@@ -36,7 +36,7 @@ export function ClientsTable({ clients }: Props) {
             <tr key={client.id} className="hover:bg-muted/30 transition-colors">
               <td className="px-4 py-3">
                 <Link
-                  href={`/trainer/clients/${client.id}`}
+                  href={`/clients/${client.id}`}
                   className="font-medium hover:underline underline-offset-4"
                 >
                   {client.full_name || "—"}

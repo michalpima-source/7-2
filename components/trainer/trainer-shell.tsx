@@ -34,9 +34,9 @@ export function TrainerShell({ fullName, children }: Props) {
         </div>
 
         <nav className="flex items-center gap-1">
-          <Link href="/trainer/clients">
+          <Link href="/clients">
             <Button
-              variant={pathname.startsWith("/trainer/clients") ? "secondary" : "ghost"}
+              variant={pathname.startsWith("/clients") ? "secondary" : "ghost"}
               size="sm"
               className="gap-1.5"
             >

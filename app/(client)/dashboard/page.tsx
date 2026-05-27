@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     .single()
 
   if (!plan) {
-    redirect("/client/onboarding")
+    redirect("/onboarding")
   }
 
   const sortedPlan = {

@@ -35,7 +35,7 @@ export function SignUpForm() {
       return
     }
     toast.success("נרשמת בהצלחה!")
-    router.push("/client/onboarding")
+    router.push("/onboarding")
   }
 
   return (

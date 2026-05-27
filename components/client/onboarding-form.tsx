@@ -52,7 +52,7 @@ export function OnboardingForm() {
       })
       if (!res.ok) throw new Error("Failed")
       toast.success("התוכנית שלך נוצרה בהצלחה! 🎉")
-      router.push("/client/dashboard")
+      router.push("/dashboard")
     } catch {
       toast.error("שגיאה ביצירת התוכנית, נסה שוב")
       setLoading(false)

@@ -14,7 +14,7 @@ export default async function OnboardingPage() {
     .single()
 
   if (clientProfile?.onboarded_at) {
-    redirect("/client/dashboard")
+    redirect("/dashboard")
   }
 
   return (

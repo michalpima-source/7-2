@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 const NAV = [
-  { href: "/client/dashboard", label: "תוכנית אימון", icon: Dumbbell },
-  { href: "/client/chat", label: "מאמן AI", icon: MessageCircle },
+  { href: "/dashboard", label: "תוכנית אימון", icon: Dumbbell },
+  { href: "/chat", label: "מאמן AI", icon: MessageCircle },
 ]
 
 interface Props {

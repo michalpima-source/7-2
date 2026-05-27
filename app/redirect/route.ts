@@ -16,7 +16,7 @@ export async function GET() {
     .single()
 
   if (profile?.role === "trainer") {
-    return NextResponse.redirect(new URL("/trainer/clients", process.env.NEXT_PUBLIC_APP_URL!))
+    return NextResponse.redirect(new URL("/clients", process.env.NEXT_PUBLIC_APP_URL!))
   }
 
   const { data: clientProfile } = await supabase
@@ -26,8 +26,8 @@ export async function GET() {
     .single()
 
   if (clientProfile?.onboarded_at) {
-    return NextResponse.redirect(new URL("/client/dashboard", process.env.NEXT_PUBLIC_APP_URL!))
+    return NextResponse.redirect(new URL("/dashboard", process.env.NEXT_PUBLIC_APP_URL!))
   }
 
-  return NextResponse.redirect(new URL("/client/onboarding", process.env.NEXT_PUBLIC_APP_URL!))
+  return NextResponse.redirect(new URL("/onboarding", process.env.NEXT_PUBLIC_APP_URL!))
 }
