@@ -30,16 +30,18 @@ export async function POST(req: Request) {
 
   if (planError || !newPlan) return new Response("Failed to duplicate", { status: 500 })
 
-  for (const day of (sourcePlan.workout_days as Array<{ id: string; day_name: string; day_order: number; exercises: Array<{ name: string; sets: number; reps: string; rest_seconds: number; instructions: string | null; exercise_order: number }> }>)) {
-    const { data: newDay } = await admin
-      .from("workout_days")
-      .insert({ plan_id: newPlan.id, day_name: day.day_name, day_order: day.day_order })
-      .select("id")
-      .single()
+  type SourceDay = { id: string; day_name: string; day_order: number; exercises: Array<{ name: string; sets: number; reps: string; rest_seconds: number; instructions: string | null; exercise_order: number }> }
 
-    if (!newDay) continue
+  await Promise.all(
+    (sourcePlan.workout_days as SourceDay[]).map(async day => {
+      const { data: newDay } = await admin
+        .from("workout_days")
+        .insert({ plan_id: newPlan.id, day_name: day.day_name, day_order: day.day_order })
+        .select("id")
+        .single()
 
-    if (day.exercises?.length) {
+      if (!newDay || !day.exercises?.length) return
+
       await admin.from("exercises").insert(
         day.exercises.map(ex => ({
           workout_day_id: newDay.id,
@@ -51,8 +53,8 @@ export async function POST(req: Request) {
           exercise_order: ex.exercise_order,
         }))
       )
-    }
-  }
+    })
+  )
 
   return Response.json({ success: true, plan_id: newPlan.id })
 }

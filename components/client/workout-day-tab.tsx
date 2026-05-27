@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { CompleteWorkoutDialog } from "@/components/client/complete-workout-dialog"
@@ -58,9 +59,11 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
       {/* Progress bar */}
       {!isCompleted && totalCount > 0 && (
         <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
-            style={{ width: `${progressPct}%` }}
+          <motion.div
+            className="h-full rounded-full bg-primary"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPct}%` }}
+            transition={{ type: "spring", stiffness: 200, damping: 30 }}
           />
         </div>
       )}
@@ -72,21 +75,41 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
           return (
             <div key={ex.id}>
               {idx > 0 && <Separator className="my-2" />}
-              <div
+              <motion.div
                 className={`rounded-lg p-2 -mx-2 flex flex-col gap-1 transition-colors ${
-                  isCompleted
-                    ? ""
-                    : "cursor-pointer hover:bg-muted/40 active:bg-muted/60"
-                } ${done && !isCompleted ? "opacity-60" : ""}`}
+                  isCompleted ? "" : "cursor-pointer hover:bg-muted/40 active:bg-muted/60"
+                }`}
+                animate={{ opacity: done && !isCompleted ? 0.55 : 1 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => !isCompleted && toggleExercise(ex.id)}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    {done ? (
-                      <CheckCircle2 className="size-4 text-green-500 shrink-0 mt-0.5" />
-                    ) : (
-                      <Circle className="size-4 text-muted-foreground/50 shrink-0 mt-0.5" />
-                    )}
+                    <AnimatePresence mode="wait" initial={false}>
+                      {done ? (
+                        <motion.span
+                          key="checked"
+                          initial={{ scale: 0.4, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.4, opacity: 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                          className="shrink-0 mt-0.5"
+                        >
+                          <CheckCircle2 className="size-4 text-green-500" />
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="unchecked"
+                          initial={{ scale: 0.4, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.4, opacity: 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                          className="shrink-0 mt-0.5"
+                        >
+                          <Circle className="size-4 text-muted-foreground/50" />
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                     <span className={`font-medium truncate ${done && !isCompleted ? "line-through text-muted-foreground" : ""}`}>
                       {ex.name}
                     </span>
@@ -114,7 +137,7 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
                 {ex.instructions && (
                   <p className="text-sm text-muted-foreground ps-6">{ex.instructions}</p>
                 )}
-              </div>
+              </motion.div>
             </div>
           )
         })}

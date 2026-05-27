@@ -20,7 +20,7 @@ interface Props {
 
 export function PushNotificationToggle({ className }: Props) {
   const [status, setStatus] = useState<Status>("loading")
-  const [reminderTime, setReminderTime] = useState("08:00")
+  const [reminderHour, setReminderHour] = useState("08")
   const [showTimeInput, setShowTimeInput] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
   const [busy, setBusy] = useState(false)
@@ -34,21 +34,24 @@ export function PushNotificationToggle({ className }: Props) {
       setStatus("denied")
       return
     }
-    navigator.serviceWorker.ready.then(reg =>
-      reg.pushManager.getSubscription().then(sub => {
-        if (sub) {
-          setSubscription(sub)
-          setStatus("active")
-        } else {
-          setStatus("inactive")
-        }
-      })
+    navigator.serviceWorker.register("/sw.js").then(() =>
+      navigator.serviceWorker.ready.then(reg =>
+        reg.pushManager.getSubscription().then(sub => {
+          if (sub) {
+            setSubscription(sub)
+            setStatus("active")
+          } else {
+            setStatus("inactive")
+          }
+        })
+      )
     )
   }, [])
 
   async function handleActivate() {
     if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) return
     setBusy(true)
+    const reminderTime = `${reminderHour}:00`
     try {
       const permission = await Notification.requestPermission()
       if (permission !== "granted") {
@@ -57,8 +60,9 @@ export function PushNotificationToggle({ className }: Props) {
         return
       }
 
-      const reg = await navigator.serviceWorker.register("/sw.js")
       await navigator.serviceWorker.ready
+      const reg = await navigator.serviceWorker.getRegistration("/sw.js")
+      if (!reg) throw new Error("Service worker not registered")
 
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
@@ -74,7 +78,7 @@ export function PushNotificationToggle({ className }: Props) {
       setSubscription(sub)
       setStatus("active")
       setShowTimeInput(false)
-      toast.success(`תזכורת מוגדרת לשעה ${reminderTime} 🔔`)
+      toast.success(`תזכורת מוגדרת לשעה ${reminderHour}:00 🔔`)
     } catch (err) {
       console.error(err)
       toast.error("שגיאה בהפעלת התראות")
@@ -137,12 +141,15 @@ export function PushNotificationToggle({ className }: Props) {
   if (showTimeInput) {
     return (
       <div className="flex items-center gap-1.5">
-        <input
-          type="time"
-          value={reminderTime}
-          onChange={e => setReminderTime(e.target.value)}
-          className="h-7 rounded border px-2 text-xs bg-background w-24"
-        />
+        <select
+          value={reminderHour}
+          onChange={e => setReminderHour(e.target.value)}
+          className="h-7 rounded border px-1.5 text-xs bg-background"
+        >
+          {Array.from({ length: 16 }, (_, i) => String(i + 5).padStart(2, "0")).map(h => (
+            <option key={h} value={h}>{h}:00</option>
+          ))}
+        </select>
         <Button size="sm" className="h-7 text-xs px-2 gap-1" onClick={handleActivate} disabled={busy}>
           {busy ? <Loader2 className="size-3 animate-spin" /> : "הפעל"}
         </Button>

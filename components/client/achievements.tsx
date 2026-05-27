@@ -46,7 +46,7 @@ interface Achievement {
 }
 
 export function Achievements({ logs, totalDaysPerWeek }: Props) {
-  const stats = useMemo(() => {
+  const { achievements, total } = useMemo<{ achievements: Achievement[]; total: number; thisMonth: number }>(() => {
     const total = logs.length
 
     const weekCounts: Record<string, number> = {}
@@ -63,79 +63,23 @@ export function Achievements({ logs, totalDaysPerWeek }: Props) {
     monthStart.setHours(0, 0, 0, 0)
     const thisMonth = logs.filter(l => new Date(l.completed_at) >= monthStart).length
 
-    return { total, bestWeek, streak, thisMonth }
-  }, [logs])
+    const achievements: Achievement[] = [
+      { id: "first", icon: Target, label: "הצעד הראשון", sublabel: "אימון ראשון", unlocked: total >= 1, color: "text-blue-600", bg: "bg-blue-500/10" },
+      { id: "five", icon: Star, label: "5 אימונים", sublabel: "מתחיל!", unlocked: total >= 5, color: "text-yellow-600", bg: "bg-yellow-500/10" },
+      { id: "ten", icon: Award, label: "10 אימונים", sublabel: "קבוע", unlocked: total >= 10, color: "text-orange-600", bg: "bg-orange-500/10" },
+      { id: "twentyfive", icon: Trophy, label: "25 אימונים", sublabel: "לוחם כושר", unlocked: total >= 25, color: "text-purple-600", bg: "bg-purple-500/10" },
+      { id: "streak", icon: Flame, label: `${streak} שבועות רצוף`, sublabel: "רצף שבועי", unlocked: streak >= 2, color: "text-red-600", bg: "bg-red-500/10" },
+      { id: "perfectweek", icon: Calendar, label: "שבוע מושלם", sublabel: `${bestWeek}/${totalDaysPerWeek} ימים`, unlocked: totalDaysPerWeek > 0 && bestWeek >= totalDaysPerWeek, color: "text-emerald-600", bg: "bg-emerald-500/10" },
+      { id: "bestweek", icon: Zap, label: `שיא: ${bestWeek} בשבוע`, sublabel: "שבוע הזהב", unlocked: bestWeek >= 3, color: "text-cyan-600", bg: "bg-cyan-500/10" },
+    ]
 
-  const achievements: Achievement[] = [
-    {
-      id: "first",
-      icon: Target,
-      label: "הצעד הראשון",
-      sublabel: "אימון ראשון",
-      unlocked: stats.total >= 1,
-      color: "text-blue-600",
-      bg: "bg-blue-500/10",
-    },
-    {
-      id: "five",
-      icon: Star,
-      label: "5 אימונים",
-      sublabel: "מתחיל!",
-      unlocked: stats.total >= 5,
-      color: "text-yellow-600",
-      bg: "bg-yellow-500/10",
-    },
-    {
-      id: "ten",
-      icon: Award,
-      label: "10 אימונים",
-      sublabel: "קבוע",
-      unlocked: stats.total >= 10,
-      color: "text-orange-600",
-      bg: "bg-orange-500/10",
-    },
-    {
-      id: "twentyfive",
-      icon: Trophy,
-      label: "25 אימונים",
-      sublabel: "לוחם כושר",
-      unlocked: stats.total >= 25,
-      color: "text-purple-600",
-      bg: "bg-purple-500/10",
-    },
-    {
-      id: "streak",
-      icon: Flame,
-      label: `${stats.streak} שבועות רצוף`,
-      sublabel: "רצף שבועי",
-      unlocked: stats.streak >= 2,
-      color: "text-red-600",
-      bg: "bg-red-500/10",
-    },
-    {
-      id: "perfectweek",
-      icon: Calendar,
-      label: "שבוע מושלם",
-      sublabel: `${stats.bestWeek}/${totalDaysPerWeek} ימים`,
-      unlocked: totalDaysPerWeek > 0 && stats.bestWeek >= totalDaysPerWeek,
-      color: "text-emerald-600",
-      bg: "bg-emerald-500/10",
-    },
-    {
-      id: "bestweek",
-      icon: Zap,
-      label: `שיא: ${stats.bestWeek} בשבוע`,
-      sublabel: "שבוע הזהב",
-      unlocked: stats.bestWeek >= 3,
-      color: "text-cyan-600",
-      bg: "bg-cyan-500/10",
-    },
-  ]
+    return { achievements, total, thisMonth }
+  }, [logs, totalDaysPerWeek])
 
   const unlocked = achievements.filter(a => a.unlocked)
   const nextLocked = achievements.filter(a => !a.unlocked).slice(0, 2)
 
-  if (stats.total === 0) return null
+  if (total === 0) return null
 
   return (
     <div>

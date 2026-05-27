@@ -45,20 +45,16 @@ export default async function DashboardPage() {
 
   const weekAgo = new Date()
   weekAgo.setDate(weekAgo.getDate() - 7)
+  const weekAgoTs = weekAgo.toISOString()
 
-  const [{ data: weekLogs }, { data: allLogs }] = await Promise.all([
-    supabase
-      .from("workout_logs")
-      .select("id, client_id, workout_day_id, completed_at, feedback")
-      .eq("client_id", user.id)
-      .gte("completed_at", weekAgo.toISOString()),
-    supabase
-      .from("workout_logs")
-      .select("id, client_id, workout_day_id, completed_at, feedback")
-      .eq("client_id", user.id)
-      .order("completed_at", { ascending: false })
-      .limit(120),
-  ])
+  const { data: allLogs } = await supabase
+    .from("workout_logs")
+    .select("id, client_id, workout_day_id, completed_at, feedback")
+    .eq("client_id", user.id)
+    .order("completed_at", { ascending: false })
+    .limit(120)
+
+  const weekLogs = (allLogs ?? []).filter(l => l.completed_at >= weekAgoTs)
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-8">

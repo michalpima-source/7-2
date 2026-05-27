@@ -11,10 +11,6 @@ export async function GET(req: Request) {
 
   initWebPush()
 
-  if (!process.env.VAPID_PUBLIC_KEY) {
-    return new Response("VAPID keys not configured", { status: 500 })
-  }
-
   const now = new Date()
   const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
 
