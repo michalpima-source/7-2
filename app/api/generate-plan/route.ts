@@ -88,7 +88,8 @@ export async function POST(req: Request) {
       prompt: userPrompt,
     })
     parsed = JSON.parse(text) as GeneratedPlan
-  } catch {
+  } catch (err) {
+    console.error("[generate-plan] AI error:", err)
     return new Response("Failed to generate plan", { status: 500 })
   }
 
@@ -101,6 +102,7 @@ export async function POST(req: Request) {
     .single()
 
   if (planError || !plan) {
+    console.error("[generate-plan] DB error (workout_plans):", planError)
     return new Response("Failed to save plan", { status: 500 })
   }
 
