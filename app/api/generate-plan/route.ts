@@ -1,5 +1,5 @@
 import { generateText } from "ai"
-import { gateway } from "@ai-sdk/gateway"
+import { anthropic } from "@ai-sdk/anthropic"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 import type { Goal, FitnessLevel } from "@/lib/types"
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
   let parsed: GeneratedPlan
   try {
     const { text } = await generateText({
-      model: gateway("anthropic/claude-sonnet-4-6"),
+      model: anthropic("claude-sonnet-4-5"),
       system: systemPrompt,
       prompt: userPrompt,
     })

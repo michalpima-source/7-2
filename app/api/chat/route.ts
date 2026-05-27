@@ -1,5 +1,5 @@
 import { convertToModelMessages, streamText, type UIMessage } from 'ai'
-import { gateway } from '@ai-sdk/gateway'
+import { anthropic } from '@ai-sdk/anthropic'
 import { createClient } from '@/lib/supabase/server'
 import { GOAL_LABELS, LEVEL_LABELS } from '@/lib/types'
 import type { Goal, FitnessLevel } from '@/lib/types'
@@ -80,7 +80,7 @@ ${(activePlan.workout_days as Array<{ day_name: string; exercises: Array<{ name:
   }
 
   const result = streamText({
-    model: gateway('anthropic/claude-sonnet-4-6'),
+    model: anthropic('claude-sonnet-4-5'),
     system: systemPrompt,
     messages: await convertToModelMessages(messages),
     onFinish: async ({ text }) => {
