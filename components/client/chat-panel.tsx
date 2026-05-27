@@ -14,6 +14,13 @@ interface Message {
   content: string
 }
 
+const SUGGESTIONS = [
+  "💪 איך אני משפר את הטכניקה בסקוואט?",
+  "🥗 מה כדאי לאכול לפני ואחרי אימון?",
+  "😴 כמה זמן מנוחה צריך בין אימונים?",
+  "🔄 יש תרגיל חלופי לכפיפות בטן?",
+]
+
 interface Props {
   clientId: string
   initialMessages: ChatMessage[]
@@ -105,14 +112,31 @@ export function ChatPanel({ clientId, initialMessages }: Props) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col items-center justify-center h-full gap-3 text-center text-muted-foreground"
+            className="flex flex-col items-center justify-center h-full gap-5 text-center px-4"
           >
-            <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Zap className="size-7 text-primary" />
+            <div className="size-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+              <Zap className="size-8 text-primary-foreground" />
             </div>
-            <p className="text-sm max-w-xs">
-              שאל אותי כל שאלה על האימונים שלך — טכניקה, חלופות, תזונה ועוד
-            </p>
+            <div>
+              <p className="font-semibold text-base">מאמן AI אישי</p>
+              <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+                שאל אותי כל שאלה על האימונים, תזונה, טכניקה, או חלופות לתרגילים
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 w-full max-w-xs">
+              {SUGGESTIONS.map((s, i) => (
+                <motion.button
+                  key={s}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.06 }}
+                  className="text-sm text-start px-4 py-2.5 rounded-xl border bg-card hover:bg-secondary/50 transition-colors text-foreground"
+                  onClick={() => setInput(s)}
+                >
+                  {s}
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
         )}
 
