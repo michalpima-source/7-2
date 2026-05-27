@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Dumbbell, MessageCircle, LogOut, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { PushNotificationToggle } from "@/components/client/push-notification-toggle"
 
 const NAV = [
   { href: "/dashboard", label: "תוכנית אימון", icon: Dumbbell },
@@ -52,8 +53,9 @@ export function ClientShell({ fullName, children }: Props) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground hidden sm:inline">{fullName}</span>
+        <div className="flex items-center gap-1">
+          <PushNotificationToggle />
+          <span className="text-sm text-muted-foreground hidden sm:inline ms-1">{fullName}</span>
           <Button variant="ghost" size="icon-sm" onClick={handleLogout} title="התנתק">
             <LogOut className="size-4" />
           </Button>

@@ -94,11 +94,11 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
                       href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + " תרגיל הדגמה")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title="הדגמה ב-YouTube"
-                      className="text-muted-foreground hover:text-red-500 transition-colors shrink-0"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded-md transition-colors shrink-0"
                       onClick={e => e.stopPropagation()}
                     >
-                      <PlayCircle className="size-4" />
+                      <PlayCircle className="size-3" />
+                      הדגמה
                     </a>
                   </div>
                   <div className="flex gap-1.5 shrink-0">

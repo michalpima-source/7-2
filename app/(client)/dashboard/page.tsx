@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { WorkoutWeekView } from "@/components/client/workout-week-view"
 import { Achievements } from "@/components/client/achievements"
+import { Button } from "@/components/ui/button"
+import { FileDown } from "lucide-react"
 import type { WorkoutPlan, WorkoutLog } from "@/lib/types"
 
 export default async function DashboardPage() {
@@ -59,9 +62,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-bold">{plan.name}</h1>
-        <p className="text-muted-foreground text-sm mt-1">התוכנית השבועית שלך</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">{plan.name}</h1>
+          <p className="text-muted-foreground text-sm mt-1">התוכנית השבועית שלך</p>
+        </div>
+        <Link href="/print/plan" target="_blank">
+          <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
+            <FileDown className="size-4" />
+            <span className="hidden sm:inline">ייצא PDF</span>
+          </Button>
+        </Link>
       </div>
 
       <WorkoutWeekView plan={sortedPlan} logs={(weekLogs ?? []) as WorkoutLog[]} />
