@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Users, LogOut, Zap, LayoutList } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -57,6 +58,7 @@ export function TrainerShell({ fullName, children }: Props) {
         </nav>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <span className="text-sm text-muted-foreground hidden sm:inline">{fullName}</span>
           <Button variant="ghost" size="icon-sm" onClick={handleLogout} title="התנתק">
             <LogOut className="size-4" />
