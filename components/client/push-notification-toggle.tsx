@@ -34,18 +34,14 @@ export function PushNotificationToggle({ className }: Props) {
       setStatus("denied")
       return
     }
-    navigator.serviceWorker.register("/sw.js").then(() =>
-      navigator.serviceWorker.ready.then(reg =>
-        reg.pushManager.getSubscription().then(sub => {
-          if (sub) {
-            setSubscription(sub)
-            setStatus("active")
-          } else {
-            setStatus("inactive")
-          }
-        })
-      )
-    )
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => navigator.serviceWorker.ready)
+      .then(reg => reg.pushManager.getSubscription())
+      .then(sub => {
+        setSubscription(sub)
+        setStatus(sub ? "active" : "inactive")
+      })
+      .catch(() => setStatus("inactive"))
   }, [])
 
   async function handleActivate() {
@@ -60,9 +56,7 @@ export function PushNotificationToggle({ className }: Props) {
         return
       }
 
-      await navigator.serviceWorker.ready
-      const reg = await navigator.serviceWorker.getRegistration("/sw.js")
-      if (!reg) throw new Error("Service worker not registered")
+      const reg = await navigator.serviceWorker.ready
 
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,

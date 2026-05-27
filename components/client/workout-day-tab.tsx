@@ -75,12 +75,10 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
           return (
             <div key={ex.id}>
               {idx > 0 && <Separator className="my-2" />}
-              <motion.div
-                className={`rounded-lg p-2 -mx-2 flex flex-col gap-1 transition-colors ${
+              <div
+                className={`rounded-lg p-2 -mx-2 flex flex-col gap-1 transition-all duration-200 ${
                   isCompleted ? "" : "cursor-pointer hover:bg-muted/40 active:bg-muted/60"
-                }`}
-                animate={{ opacity: done && !isCompleted ? 0.55 : 1 }}
-                transition={{ duration: 0.2 }}
+                } ${done && !isCompleted ? "opacity-55" : "opacity-100"}`}
                 onClick={() => !isCompleted && toggleExercise(ex.id)}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -137,7 +135,7 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
                 {ex.instructions && (
                   <p className="text-sm text-muted-foreground ps-6">{ex.instructions}</p>
                 )}
-              </motion.div>
+              </div>
             </div>
           )
         })}
