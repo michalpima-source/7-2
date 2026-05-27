@@ -14,7 +14,9 @@ interface Props {
 }
 
 export function WorkoutDayTab({ day, isCompleted }: Props) {
-  const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set())
+  const [completedExercises, setCompletedExercises] = useState<Set<string>>(
+    () => isCompleted ? new Set(day.exercises.map(e => e.id)) : new Set()
+  )
 
   function toggleExercise(id: string) {
     setCompletedExercises(prev => {
@@ -71,15 +73,13 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
       {/* Exercises */}
       <div className="flex flex-col gap-1">
         {day.exercises.map((ex, idx) => {
-          const done = isCompleted || completedExercises.has(ex.id)
+          const done = completedExercises.has(ex.id)
           return (
             <div key={ex.id}>
               {idx > 0 && <Separator className="my-2" />}
               <div
-                className={`rounded-lg p-2 -mx-2 flex flex-col gap-1 transition-all duration-200 ${
-                  isCompleted ? "" : "cursor-pointer hover:bg-muted/40 active:bg-muted/60"
-                } ${done && !isCompleted ? "opacity-55" : "opacity-100"}`}
-                onClick={() => !isCompleted && toggleExercise(ex.id)}
+                className={`rounded-lg p-2 -mx-2 flex flex-col gap-1 transition-all duration-200 cursor-pointer hover:bg-muted/40 active:bg-muted/60 ${done ? "opacity-55" : "opacity-100"}`}
+                onClick={() => toggleExercise(ex.id)}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
@@ -108,7 +108,7 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
                         </motion.span>
                       )}
                     </AnimatePresence>
-                    <span className={`font-medium truncate ${done && !isCompleted ? "line-through text-muted-foreground" : ""}`}>
+                    <span className={`font-medium truncate ${done ? "line-through text-muted-foreground" : ""}`}>
                       {ex.name}
                     </span>
                     <a
