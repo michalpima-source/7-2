@@ -68,6 +68,19 @@ export interface ClientWithStats extends Profile {
   client_profile: ClientProfile | null
   completion_pct: number
   active_plan_name: string | null
+  last_workout_at: string | null
+}
+
+export interface PlanWithStats {
+  id: string
+  name: string
+  client_id: string
+  client_name: string
+  is_active: boolean
+  ai_generated: boolean
+  created_at: string
+  days_count: number
+  exercises_count: number
 }
 
 export const GOAL_LABELS: Record<Goal, string> = {

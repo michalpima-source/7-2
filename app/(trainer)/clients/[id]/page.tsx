@@ -4,10 +4,11 @@ import { CompletionChart } from "@/components/trainer/completion-chart"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
-import { MessageCircle } from "lucide-react"
+import { MessageCircle, Dumbbell, Calendar, TrendingUp, Clock } from "lucide-react"
 import { GOAL_LABELS, LEVEL_LABELS } from "@/lib/types"
-import type { Goal, FitnessLevel, WorkoutLog, ChatMessage } from "@/lib/types"
-import { format } from "date-fns"
+import type { Goal, FitnessLevel, WorkoutLog } from "@/lib/types"
+import { format, formatDistanceToNow } from "date-fns"
+import { he } from "date-fns/locale"
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -15,12 +16,17 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/sign-in")
 
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+
   const [
     { data: profile },
     { data: clientProfile },
     { data: activePlan },
     { data: logs },
     { data: chatMessages },
+    completionResult,
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", id).single(),
     supabase.from("client_profiles").select("*").eq("id", id).single(),
@@ -44,17 +50,34 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       .eq("client_id", id)
       .order("created_at", { ascending: false })
       .limit(50),
+    supabase.rpc("get_client_completion", {
+      p_client_id: id,
+      p_month_start: monthStart.toISOString().split("T")[0],
+    }),
   ])
 
   if (!profile) notFound()
+
+  const completionPct = (completionResult.data as number) ?? 0
+  const totalWorkouts = logs?.length ?? 0
+  const thisMonthWorkouts = logs?.filter(l => new Date(l.completed_at) >= monthStart).length ?? 0
+  const lastWorkout = logs?.[0]?.completed_at ?? null
+  const daysSinceLast = lastWorkout
+    ? Math.floor((Date.now() - new Date(lastWorkout).getTime()) / (1000 * 60 * 60 * 24))
+    : null
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">{profile.full_name}</h1>
-          <p className="text-muted-foreground text-sm mt-1">{profile.phone ?? "אין טלפון"}</p>
+        <div className="flex items-center gap-3">
+          <div className="size-12 rounded-full bg-muted flex items-center justify-center font-bold text-lg">
+            {(profile.full_name || "?").slice(0, 1)}
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">{profile.full_name}</h1>
+            <p className="text-muted-foreground text-sm">{profile.phone ?? "אין טלפון"}</p>
+          </div>
         </div>
         {profile.phone && (
           <a
@@ -70,7 +93,41 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         )}
       </div>
 
-      {/* Client info */}
+      {/* Stats cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="rounded-xl border bg-card p-4 flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <Dumbbell className="size-3.5" />
+            סה״כ אימונים
+          </div>
+          <p className="text-2xl font-bold">{totalWorkouts}</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <Calendar className="size-3.5" />
+            החודש
+          </div>
+          <p className="text-2xl font-bold">{thisMonthWorkouts}</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <TrendingUp className="size-3.5" />
+            השלמה החודש
+          </div>
+          <p className="text-2xl font-bold">{completionPct}%</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <Clock className="size-3.5" />
+            אימון אחרון
+          </div>
+          <p className="text-2xl font-bold">
+            {daysSinceLast === null ? "—" : daysSinceLast === 0 ? "היום" : `${daysSinceLast}י׳`}
+          </p>
+        </div>
+      </div>
+
+      {/* Client profile info */}
       <div className="rounded-xl border p-4 flex flex-wrap gap-3">
         {clientProfile?.goal && (
           <Badge variant="secondary">{GOAL_LABELS[clientProfile.goal as Goal]}</Badge>
@@ -81,15 +138,21 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         {activePlan && (
           <Badge variant="outline">תוכנית: {activePlan.name}</Badge>
         )}
+        {clientProfile?.available_days && clientProfile.available_days.length > 0 && (
+          <Badge variant="outline">{clientProfile.available_days.length} ימי אימון בשבוע</Badge>
+        )}
         {clientProfile?.limitations && (
           <p className="w-full text-sm text-muted-foreground">מגבלות: {clientProfile.limitations}</p>
+        )}
+        {!clientProfile?.onboarded_at && (
+          <p className="w-full text-sm text-yellow-600">לקוח טרם השלים onboarding</p>
         )}
       </div>
 
       {/* Progress chart */}
       {logs && logs.length > 0 && activePlan?.workout_days && (
         <div>
-          <h2 className="text-lg font-semibold mb-3">התקדמות</h2>
+          <h2 className="text-lg font-semibold mb-3">התקדמות שבועית</h2>
           <CompletionChart
             logs={logs as WorkoutLog[]}
             totalDaysPerWeek={activePlan.workout_days.length}
@@ -102,17 +165,28 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         <div>
           <h2 className="text-lg font-semibold mb-3">יומן אימונים</h2>
           <div className="rounded-xl border divide-y overflow-hidden">
-            {logs.slice(0, 10).map(log => (
+            {logs.slice(0, 15).map(log => (
               <div key={log.id} className="px-4 py-3 flex justify-between items-start gap-3">
-                <div className="text-sm">
-                  {format(new Date(log.completed_at), "dd/MM/yyyy HH:mm")}
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-medium">
+                    {format(new Date(log.completed_at), "EEEE, dd/MM/yyyy", { locale: he })}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(log.completed_at), { addSuffix: true, locale: he })}
+                  </span>
                 </div>
                 {log.feedback && (
-                  <p className="text-sm text-muted-foreground flex-1">{log.feedback}</p>
+                  <p className="text-sm text-muted-foreground flex-1 text-left">{log.feedback}</p>
                 )}
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {logs && logs.length === 0 && (
+        <div className="rounded-xl border p-6 text-center text-muted-foreground text-sm">
+          הלקוח טרם ביצע אימונים
         </div>
       )}
 
@@ -140,6 +214,12 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {chatMessages && chatMessages.length === 0 && (
+        <div className="rounded-xl border p-6 text-center text-muted-foreground text-sm">
+          אין היסטוריית צ&apos;אט
         </div>
       )}
     </div>

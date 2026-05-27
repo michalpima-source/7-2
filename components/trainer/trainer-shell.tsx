@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Users, LogOut, Zap } from "lucide-react"
+import { Users, LogOut, Zap, LayoutList } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -42,6 +42,16 @@ export function TrainerShell({ fullName, children }: Props) {
             >
               <Users className="size-4" />
               <span className="hidden sm:inline">לקוחות</span>
+            </Button>
+          </Link>
+          <Link href="/plans">
+            <Button
+              variant={pathname.startsWith("/plans") ? "secondary" : "ghost"}
+              size="sm"
+              className="gap-1.5"
+            >
+              <LayoutList className="size-4" />
+              <span className="hidden sm:inline">תוכניות</span>
             </Button>
           </Link>
         </nav>
