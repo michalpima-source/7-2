@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { CompleteWorkoutDialog } from "@/components/client/complete-workout-dialog"
 import type { WorkoutDay } from "@/lib/types"
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, PlayCircle } from "lucide-react"
 
 interface Props {
   day: WorkoutDay
@@ -32,7 +32,18 @@ export function WorkoutDayTab({ day, isCompleted }: Props) {
             {idx > 0 && <Separator className="mb-3" />}
             <div className="flex flex-col gap-1">
               <div className="flex items-start justify-between gap-2">
-                <span className="font-medium">{ex.name}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium">{ex.name}</span>
+                  <a
+                    href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + " תרגיל הדגמה")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="הדגמה ב-YouTube"
+                    className="text-muted-foreground hover:text-red-500 transition-colors"
+                  >
+                    <PlayCircle className="size-4" />
+                  </a>
+                </div>
                 <div className="flex gap-1.5 shrink-0">
                   <Badge variant="secondary">{ex.sets} סטים</Badge>
                   <Badge variant="secondary">{ex.reps} חזרות</Badge>
