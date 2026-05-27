@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { WorkoutWeekView } from "@/components/client/workout-week-view"
+import { Achievements } from "@/components/client/achievements"
 import type { WorkoutPlan, WorkoutLog } from "@/lib/types"
 
 export default async function DashboardPage() {
@@ -42,19 +43,33 @@ export default async function DashboardPage() {
   const weekAgo = new Date()
   weekAgo.setDate(weekAgo.getDate() - 7)
 
-  const { data: logs } = await supabase
-    .from("workout_logs")
-    .select("id, client_id, workout_day_id, completed_at, feedback")
-    .eq("client_id", user.id)
-    .gte("completed_at", weekAgo.toISOString())
+  const [{ data: weekLogs }, { data: allLogs }] = await Promise.all([
+    supabase
+      .from("workout_logs")
+      .select("id, client_id, workout_day_id, completed_at, feedback")
+      .eq("client_id", user.id)
+      .gte("completed_at", weekAgo.toISOString()),
+    supabase
+      .from("workout_logs")
+      .select("id, client_id, workout_day_id, completed_at, feedback")
+      .eq("client_id", user.id)
+      .order("completed_at", { ascending: false })
+      .limit(120),
+  ])
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto">
-      <div className="mb-6">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-8">
+      <div>
         <h1 className="text-2xl font-bold">{plan.name}</h1>
         <p className="text-muted-foreground text-sm mt-1">התוכנית השבועית שלך</p>
       </div>
-      <WorkoutWeekView plan={sortedPlan} logs={(logs ?? []) as WorkoutLog[]} />
+
+      <WorkoutWeekView plan={sortedPlan} logs={(weekLogs ?? []) as WorkoutLog[]} />
+
+      <Achievements
+        logs={(allLogs ?? []) as WorkoutLog[]}
+        totalDaysPerWeek={sortedPlan.workout_days.length}
+      />
     </div>
   )
 }
