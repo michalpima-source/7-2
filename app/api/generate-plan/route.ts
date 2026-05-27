@@ -87,8 +87,9 @@ export async function POST(req: Request) {
       system: systemPrompt,
       prompt: userPrompt,
     })
-    const clean = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
-    parsed = JSON.parse(clean) as GeneratedPlan
+    const match = text.match(/\{[\s\S]*\}/)
+    if (!match) throw new Error("No JSON object in response")
+    parsed = JSON.parse(match[0]) as GeneratedPlan
   } catch (err) {
     console.error("[generate-plan] AI error:", err)
     return new Response("Failed to generate plan", { status: 500 })
